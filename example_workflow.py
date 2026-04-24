@@ -15,7 +15,7 @@ import numpy as np
 import spatialdata
 from spatialdata.models import Image2DModel
 
-from annotate_sdata import (
+from napari_spatial_data import (
     open_in_napari,
     add_labels_layer,
     add_shapes_layer,

@@ -4,3 +4,5 @@
 .venv
 
 notebooks/
+notebooks/*.egg-info/
+"*.egg-info/" 

@@ -741,7 +741,7 @@ def measure_label_morphology(
     import anndata as ad  # type: ignore
     import pandas as pd
     from skimage.measure import label as skimage_label, regionprops_table  # type: ignore
-    from sdata_utils import get_scale0_xarray, get_channel_names
+    from napari_spatial_data.sdata_utils import get_scale0_xarray, get_channel_names
 
     # --- resolve label mask -------------------------------------------------
     element = sdata.labels[labels_key]
