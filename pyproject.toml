@@ -37,7 +37,7 @@ dev = [
 ]
 
 [tool.setuptools.dynamic]
-version = { attr = "napari_spatial_data.__version__" }
+version = { attr = "napari_spatial_data._version.__version__" }
 
 [tool.setuptools.packages.find]
 where = ["src"]
