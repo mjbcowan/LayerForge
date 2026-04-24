@@ -37,7 +37,7 @@ Utilities:
 
 from __future__ import annotations
 
-__version__ = "0.2.0"
+from napari_spatial_data._version import __version__
 
 from napari_spatial_data.annotate_sdata import (
     open_in_napari,
