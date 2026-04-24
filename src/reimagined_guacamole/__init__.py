@@ -1,5 +1,5 @@
 """
-napari-spatial-data
+reimagined_guacamole
 ===================
 
 Interactive semantic annotation of SpatialData images using napari.
@@ -37,10 +37,10 @@ Utilities:
 
 from __future__ import annotations
 
-from napari_spatial_data._version import __version__
+from reimagined_guacamole._version import __version__
 
 try:
-    from napari_spatial_data.annotate_sdata import (
+    from reimagined_guacamole.annotate_sdata import (
         open_in_napari,
         add_labels_layer,
         add_shapes_layer,
@@ -53,7 +53,7 @@ try:
         run_annotation_session,
         run_refinement_session,
     )
-    from napari_spatial_data.sdata_utils import (
+    from reimagined_guacamole.sdata_utils import (
         get_scale0_xarray,
         get_scale0_shape,
         get_channel_names,

@@ -8,7 +8,7 @@ import napari
 import spatialdata
 from spatialdata.models import Image2DModel
 
-from napari_spatial_data.annotate_sdata import (
+from reimagined_guacamole.annotate_sdata import (
     add_labels_layer,
     labels_layer_to_sdata,
     rasterize_shapes_to_labels,
@@ -83,7 +83,7 @@ def test_rasterize_shapes_creates_labels(demo_sdata):
 
 def test_labels_to_shapes_roundtrip(demo_sdata):
     """Create a labels element, vectorize to shapes, check class_ids preserved."""
-    from napari_spatial_data.sdata_utils import wrap_to_multiscale_labels
+    from reimagined_guacamole.sdata_utils import wrap_to_multiscale_labels
 
     mask = np.zeros((64, 64), dtype=np.int32)
     mask[10:30, 10:30] = 1

@@ -6,7 +6,7 @@ import pytest
 import spatialdata
 from spatialdata.models import Image2DModel
 
-from napari_spatial_data.sdata_utils import (
+from reimagined_guacamole.sdata_utils import (
     get_scale0_xarray,
     get_scale0_shape,
     get_channel_names,
