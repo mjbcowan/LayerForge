@@ -1,5 +1,7 @@
 # reimagined_guacamole
-A helper package to annotate semantic masks using Napari for spatialdata objects.
+A helper package to annotate semantic masks using Napari for image elements of spatialdata objects (with functionalities to save as embedded shapes / label layers, and as shape parquets / .npy files). Useful for labelling, useful for annotating training data for your own models.
+
+> _This package is a work in progress_
 
 ## Installation
 ```python
@@ -7,7 +9,7 @@ pip install git+https://<PAT>@github.com/mjbcowan/reimagined_guacamole@main
 ```
 
 ## References and Acknowledgements
-> **This _package_ is not officially affiliated SpatialData, nor Napari**
+> **This _package_ is not officially affiliated with SpatialData, nor Napari**
 
 
 Please cite the following if using this package. Sincere thanks to the developers and maintainers of these packages.
