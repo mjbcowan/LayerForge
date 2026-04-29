@@ -1,5 +1,5 @@
 """
-reimagined_guacamole
+LayerForge
 ===================
 
 Interactive semantic annotation of SpatialData images using napari.
@@ -37,10 +37,10 @@ Utilities:
 
 from __future__ import annotations
 
-from reimagined_guacamole._version import __version__
+from LayerForge._version import __version__
 
 try:
-    from reimagined_guacamole.annotate_sdata import (
+    from LayerForge.annotate_sdata import (
         open_in_napari,
         add_labels_layer,
         add_shapes_layer,
@@ -53,11 +53,11 @@ try:
         run_annotation_session,
         run_refinement_session,
     )
-    from reimagined_guacamole.sample_data import (
+    from LayerForge.sample_data import (
         load_skin_sample,
         SKIN_CLASS_LABELS,
     )
-    from reimagined_guacamole.sdata_utils import (
+    from LayerForge.sdata_utils import (
         get_scale0_xarray,
         get_scale0_shape,
         get_channel_names,

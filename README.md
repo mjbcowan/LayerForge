@@ -1,11 +1,11 @@
-# reimagined_guacamole
+# LayerForge
 A helper package to annotate semantic masks using Napari for image elements of spatialdata objects (with functionalities to save as embedded shapes / label layers, and as shape parquets / .npy files). Useful for labelling, useful for annotating training data for your own models.
 
 > _This package is a work in progress_
 
 ## Installation
 ```python
-pip install git+https://<PAT>@github.com/mjbcowan/reimagined_guacamole@main
+pip install git+https://<PAT>@github.com/mjbcowan/LayerForge@main
 ```
 
 ## References and Acknowledgements

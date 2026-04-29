@@ -1,16 +1,16 @@
-# Shapes2Labels
+# LayerForge
 >_Pre-release_. Work in progress.
 
-`Shapes2Labels` is a Napari based annotator tool to enable ground truth, multiclass annotation of large images using spatialdata's Zarr protocol. For a fuller, more comprehensive package please refer to [`napari-spatialdata-repo`](https://github.com/scverse/napari-spatialdata).
+`LayerForge` is a Napari based annotator tool to enable ground truth, multiclass annotation of large images using spatialdata's Zarr protocol. For a fuller, more comprehensive package please refer to [`napari-spatialdata-repo`](https://github.com/scverse/napari-spatialdata).
 
-Full github repository can be found [here](https://github.com/mjbcowan/reimagined_guacamole/tree/main).
+Full github repository can be found [here](https://github.com/mjbcowan/LayerForge/tree/main).
 
 ![Demo](assets/shapes2label_annotation.gif)
 
-*Shapes2Labels annotation workflow: drawing shapes and generating pixel classification masks. Image credit: [skimage.data (skin)](https://scikit-image.org/docs/stable/api/skimage.data.html).*
+*LayerForge annotation workflow: drawing shapes and generating pixel classification masks. Image credit: [skimage.data (skin)](https://scikit-image.org/docs/stable/api/skimage.data.html).*
 
 ## Scope and Design Intent
-`Shapes2Labels` has been designed as a lightweight method for:
+`LayerForge` has been designed as a lightweight method for:
 
 * Multiscale visualisation of bioimaging formats, specifically multiplexed images, RGB images, and paganin-filtered synchrotron images
 * Annotation of shapes of multiple class types across whole image in single layer which can be visualised dynamically

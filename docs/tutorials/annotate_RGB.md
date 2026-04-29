@@ -7,7 +7,7 @@ import numpy as np
 import spatialdata
 from spatialdata.models import Image2DModel
 
-from reimagined_guacamole import (
+from LayerForge import (
     open_in_napari,
     add_labels_layer,
     add_shapes_layer,
@@ -58,7 +58,7 @@ The image can now be visualised using the command:
 sdata.pl.render_images("skin").pl.show()
 ```
 ## Annotating
-This method will allow you to view the MSI stored in the SpatialData object, accessible by a given `image_key`, storing the annotated shape objects in a specified `shapes_key` and subsequently produce a labels layer at `labels_from_shapes_key`. Shapes2Labels will parse through the shapes objects (including overlapping shapes) and prioritise shapes with a smaller area. 
+This method will allow you to view the MSI stored in the SpatialData object, accessible by a given `image_key`, storing the annotated shape objects in a specified `shapes_key` and subsequently produce a labels layer at `labels_from_shapes_key`. LayerForge will parse through the shapes objects (including overlapping shapes) and prioritise shapes with a smaller area. 
 
 
 > This allows for small vessels, artefacts, or any other annotation to be nested within larger polygon feature annotations. 
@@ -125,7 +125,7 @@ sdata.pl.render_images(IMAGE_KEY).pl.render_labels(LABELS_FROM_SHAPES_KEY).pl.sh
 ![skin labels](../assets/skin_labels.jpg)
 > n.b. the user's annotations will naturally vary. To continue the tutorial, load sample labels using the following:
 ```python
-from reimagined_guacamole import load_skin_sample, SKIN_CLASS_LABELS
+from LayerForge import load_skin_sample, SKIN_CLASS_LABELS
 
 sdata2 = load_skin_sample() # this will load a preannotated sdata object
 sdata2

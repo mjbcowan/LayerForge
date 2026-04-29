@@ -1,5 +1,5 @@
 """
-Sample data helpers for reimagined_guacamole tutorials.
+Sample data helpers for LayerForge tutorials.
 
 Provides a pre-annotated skin histology SpatialData object so that tutorial
 users can skip the interactive annotation step and jump straight to exploring
@@ -7,7 +7,7 @@ labels, measuring morphology, or refining an existing mask.
 
 Usage
 -----
-    from reimagined_guacamole.sample_data import load_skin_sample
+    from LayerForge.sample_data import load_skin_sample
 
     sdata = load_skin_sample()
     # sdata.images["skin"]       — multiscale RGB image (900×900)
@@ -72,7 +72,7 @@ def load_skin_sample(scale_factors: list[int] | None = None) -> sd.SpatialData:
     )
 
     # --- labels ---------------------------------------------------------
-    data_file = files("reimagined_guacamole.data").joinpath("skin_labels.npy")
+    data_file = files("LayerForge.data").joinpath("skin_labels.npy")
     mask = np.load(str(data_file)).astype(np.int32)  # (900, 900)
     labels = Labels2DModel.parse(
         mask,
