@@ -3,8 +3,6 @@
 
 `LayerForge` is a Napari based annotator tool to enable ground truth, multiclass annotation of large images using spatialdata's Zarr protocol. For a fuller, more comprehensive package please refer to [`napari-spatialdata-repo`](https://github.com/scverse/napari-spatialdata).
 
-Full github repository can be found [here](https://github.com/mjbcowan/LayerForge/tree/main).
-
 ![Demo](assets/shapes2label_annotation.gif)
 
 *LayerForge annotation workflow: drawing shapes and generating pixel classification masks. Image credit: [skimage.data (skin)](https://scikit-image.org/docs/stable/api/skimage.data.html).*

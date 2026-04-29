@@ -1,4 +1,5 @@
 site_name: LayerForge
+repo_url: https://github.com/mjbcowan/LayerForge
 theme:
   name: material
   logo: assets/layerforge_logo_nbg.png # for on website
