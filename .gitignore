@@ -2,6 +2,7 @@
 
 .claude
 .venv
+.pytest_cache
 
 notebooks/
 notebooks/*.egg-info/

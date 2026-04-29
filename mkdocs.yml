@@ -1,0 +1,7 @@
+site_name: Shapes2Labels
+theme: material
+
+markdown_extensions:
+  - attr_list
+  - md_in_html
+  - tables
