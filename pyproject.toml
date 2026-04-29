@@ -43,7 +43,7 @@ version = { attr = "reimagined_guacamole._version.__version__" }
 where = ["src"]
 
 [tool.setuptools.package-data]
-reimagined_guacamole = ["py.typed"]
+reimagined_guacamole = ["py.typed", "data/*.npy"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

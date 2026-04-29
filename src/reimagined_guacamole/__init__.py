@@ -53,6 +53,10 @@ try:
         run_annotation_session,
         run_refinement_session,
     )
+    from reimagined_guacamole.sample_data import (
+        load_skin_sample,
+        SKIN_CLASS_LABELS,
+    )
     from reimagined_guacamole.sdata_utils import (
         get_scale0_xarray,
         get_scale0_shape,
@@ -72,6 +76,9 @@ except ModuleNotFoundError as e:
 
 __all__ = [
     "__version__",
+    # Sample data
+    "load_skin_sample",
+    "SKIN_CLASS_LABELS",
     # Annotation sessions
     "run_annotation_session",
     "run_refinement_session",
