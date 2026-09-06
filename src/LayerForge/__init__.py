@@ -31,8 +31,15 @@ Utilities:
     get_channel_names
     copy_transform
     wrap_to_multiscale_labels
+    sdata_image_to_layer_data
     class_id_colormap
     print_sdata_summary
+
+napari plugin (loader + widgets):
+    load_image_as_sdata
+    default_scale_factors
+    napari_get_reader
+    AnnotationWidget
 """
 
 from __future__ import annotations
@@ -63,9 +70,16 @@ try:
         get_channel_names,
         copy_transform,
         wrap_to_multiscale_labels,
+        sdata_image_to_layer_data,
         class_id_colormap,
         print_sdata_summary,
     )
+    from LayerForge._reader import (
+        load_image_as_sdata,
+        default_scale_factors,
+        napari_get_reader,
+    )
+    from LayerForge._widgets import AnnotationWidget
 except ModuleNotFoundError as e:
     if "pkg_resources" in str(e):
         raise RuntimeError(
@@ -100,6 +114,12 @@ __all__ = [
     "get_channel_names",
     "copy_transform",
     "wrap_to_multiscale_labels",
+    "sdata_image_to_layer_data",
     "class_id_colormap",
     "print_sdata_summary",
+    # napari plugin (loader + widgets)
+    "load_image_as_sdata",
+    "default_scale_factors",
+    "napari_get_reader",
+    "AnnotationWidget",
 ]

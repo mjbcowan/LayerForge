@@ -55,95 +55,16 @@ def open_in_napari(sdata: spatialdata.SpatialData, image_key: str = "image") -> 
     napari.Viewer
         A running viewer with the image already visible.
     """
-    element = sdata.images[image_key]
+    from LayerForge.sdata_utils import sdata_image_to_layer_data
 
-    # --- resolve channel names -----------------------------------------
-    # MultiscaleSpatialImage: grab scale0 to inspect coords
-    try:
-        scale0 = element["scale0"].ds  # xarray.Dataset at full resolution
-        xarr = next(iter(scale0.data_vars.values()))  # single DataArray
-    except (TypeError, AttributeError):
-        xarr = element  # already a plain DataArray
-
-    if "c" in xarr.coords:
-        channel_names = [str(c) for c in xarr.coords["c"].values]
-    elif "c" in xarr.dims:
-        channel_names = [f"ch-{i}" for i in range(xarr.sizes["c"])]
-    else:
-        channel_names = None
-
-    # --- add multiscale image ------------------------------------------
-    # Always add the image manually so all channels are immediately visible
-    # in the napari canvas. napari-spatialdata's Interactive requires the user
-    # to manually select elements in its side panel, which hides the image on
-    # launch and is confusing for annotation workflows.
+    # Always add the image manually (one Image layer per channel) so all
+    # channels are immediately visible in the napari canvas. napari-spatialdata's
+    # Interactive requires the user to manually select elements in its side
+    # panel, which hides the image on launch and is confusing for annotation
+    # workflows.
     viewer = napari.Viewer(title="SpatialData annotator")
-    viewer = _add_image_manually(sdata, image_key, channel_names, viewer)
-
-    return viewer
-
-
-def _add_image_manually(
-    sdata: spatialdata.SpatialData,
-    image_key: str,
-    channel_names: list[str] | None,
-    viewer: napari.Viewer,
-) -> napari.Viewer:
-    """
-    Add the SpatialData image to napari as a multiscale layer.
-
-    Pyramid levels are passed as dask arrays (lazy) so that large images
-    (e.g. 13 k × 24 k pixels) do not trigger an eager full load into RAM.
-    Each channel is added as a separate Image layer so it can be toggled,
-    coloured, and contrast-adjusted independently — essential for multiplexed
-    / multichannel MSI data.
-    """
-    import dask.array as da
-
-    element = sdata.images[image_key]
-
-    try:
-        # MultiscaleSpatialImage → collect pyramid levels in order, keeping
-        # data as dask arrays (no .values call) to avoid eager loading.
-        scale_keys = sorted(element.keys())  # "scale0", "scale1", …
-        pyramid = []
-        for sk in scale_keys:
-            ds = element[sk].ds
-            arr = next(iter(ds.data_vars.values()))
-            # Convert to dask if not already (keeps loading lazy)
-            pyramid.append(da.from_array(arr) if not hasattr(arr.data, "dask") else arr.data)
-        n_channels = pyramid[0].shape[0]
-        data_is_multiscale = True
-    except (TypeError, AttributeError):
-        # Plain DataArray — wrap in a single-element list so the loop below
-        # works uniformly.
-        arr = element
-        dask_arr = da.from_array(arr) if not hasattr(arr.data, "dask") else arr.data
-        pyramid = [dask_arr]
-        n_channels = pyramid[0].shape[0]
-        data_is_multiscale = False
-
-    # Colormaps to cycle through for each channel
-    _CHANNEL_COLORMAPS = [
-        "blue", "green", "red", "cyan", "magenta", "yellow",
-        "gray", "bop orange", "bop purple", "bop blue",
-    ]
-
-    for ch_idx in range(n_channels):
-        # Slice each pyramid level to a single channel → (y, x) per level
-        ch_pyramid = [level[ch_idx] for level in pyramid]
-        ch_data = ch_pyramid if data_is_multiscale else ch_pyramid[0]
-
-        ch_name = channel_names[ch_idx] if channel_names and ch_idx < len(channel_names) else f"ch-{ch_idx}"
-        colormap = _CHANNEL_COLORMAPS[ch_idx % len(_CHANNEL_COLORMAPS)]
-
-        viewer.add_image(
-            ch_data,
-            name=ch_name,
-            colormap=colormap,
-            blending="additive",
-            visible=True,
-        )
+    for data, kwargs, _layer_type in sdata_image_to_layer_data(sdata, image_key):
+        viewer.add_image(data, **kwargs)
 
     return viewer
 
@@ -852,6 +773,50 @@ def _run_napari_event_loop() -> None:
     napari.run()
 
 
+def _scale0_label_array(sdata: spatialdata.SpatialData, labels_key: str) -> np.ndarray:
+    """Return the full-resolution (scale0) numpy array for a Labels element."""
+    element = sdata.labels[labels_key]
+    try:
+        scale0_node = element["scale0"]
+        ds = scale0_node.ds
+        xarr = next(iter(ds.data_vars.values()))
+        return np.asarray(xarr.values)
+    except (TypeError, AttributeError, KeyError):
+        return np.asarray(element.values)
+
+
+def _flush_flattened_mask(
+    mask: np.ndarray,
+    sdata: spatialdata.SpatialData,
+    output_path: "str | Path",
+) -> None:
+    """
+    Write a flattened ``.tif``/``.npy`` copy of *mask* to *output_path*, and
+    write *sdata* itself to a sibling ``.zarr`` store (same stem) so the
+    raster mask and the annotated SpatialData object are saved together.
+    """
+    from pathlib import Path as _Path
+
+    output_path = _Path(output_path)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+
+    suffix = output_path.suffix.lower()
+    if suffix in (".tif", ".tiff"):
+        import tifffile
+        tifffile.imwrite(output_path, mask)
+    elif suffix == ".npy":
+        np.save(output_path, mask)
+    else:
+        raise ValueError(
+            f"output_path must end in '.tif', '.tiff', or '.npy', got {output_path.suffix!r}"
+        )
+
+    zarr_path = output_path.with_suffix(".zarr")
+    sdata.write(zarr_path, overwrite=True)
+
+    print(f"Flushed flattened mask to {output_path} and SpatialData to {zarr_path}")
+
+
 def run_annotation_session(
     sdata: spatialdata.SpatialData,
     image_key: str = "image",
@@ -860,6 +825,7 @@ def run_annotation_session(
     shapes_element_name: str = "shapes_semantic",
     scale_factors: list[int] | None = None,
     class_labels: dict[int, str] | None = None,
+    output_path: "str | Path | None" = None,
 ) -> None:
     """
     Launch an interactive napari annotation session and export the result back
@@ -890,6 +856,11 @@ def run_annotation_session(
         Optional mapping of class_id → human-readable name shown in the
         class selector widget (shapes mode only), e.g.
         ``{1: "artefact", 2: "epidermis", ...}``.
+    output_path:
+        If provided, on close also flushes the flattened mask (as
+        ``labels_element_name``) to this ``.tif``/``.tiff``/``.npy`` path,
+        alongside a ``.zarr`` write of *sdata* to a sibling path with the
+        same stem.
     """
     viewer = open_in_napari(sdata, image_key=image_key)
 
@@ -920,6 +891,8 @@ def run_annotation_session(
                 element_name=labels_element_name,
                 scale_factors=scale_factors,
             )
+            if output_path is not None:
+                _flush_flattened_mask(layer.data, sdata, output_path)
 
         viewer.window._qt_window.destroyed.connect(_on_viewer_close_labels)
         _run_napari_event_loop()
@@ -957,6 +930,14 @@ def run_annotation_session(
                     image_key=image_key,
                     element_name=labels_element_name,
                     scale_factors=scale_factors,
+                )
+                if output_path is not None:
+                    mask = _scale0_label_array(sdata, labels_element_name)
+                    _flush_flattened_mask(mask, sdata, output_path)
+            elif output_path is not None:
+                print(
+                    "No shapes were drawn — skipping flattened mask export to "
+                    f"{output_path!r}."
                 )
 
         viewer.window._qt_window.destroyed.connect(_on_viewer_close)

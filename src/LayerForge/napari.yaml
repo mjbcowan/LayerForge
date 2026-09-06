@@ -1,0 +1,24 @@
+name: LayerForge
+display_name: LayerForge
+contributions:
+  commands:
+    - id: LayerForge.get_reader
+      title: Open image with LayerForge
+      python_name: LayerForge._reader:napari_get_reader
+    - id: LayerForge.make_annotation_widget
+      title: LayerForge annotation panel
+      python_name: LayerForge._widgets:AnnotationWidget
+
+  readers:
+    - command: LayerForge.get_reader
+      accepts_directories: false
+      filename_patterns:
+        - "*.tif"
+        - "*.tiff"
+        - "*.png"
+        - "*.jpg"
+        - "*.jpeg"
+
+  widgets:
+    - command: LayerForge.make_annotation_widget
+      display_name: LayerForge annotation panel

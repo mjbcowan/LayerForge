@@ -5,6 +5,10 @@
 
 ![Demo](assets/shapes2label_annotation.gif)
 
+> New to LayerForge and just need to annotate an image? See the
+> [annotation protocol](annotation_protocol.md) for a no-coding-required,
+> step-by-step guide (install napari, install the plugin, annotate, save).
+
 *LayerForge annotation workflow: drawing shapes and generating pixel classification masks. Image credit: [skimage.data (skin)](https://scikit-image.org/docs/stable/api/skimage.data.html).*
 
 ## Scope and Design Intent

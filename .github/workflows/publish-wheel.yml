@@ -1,0 +1,50 @@
+name: Publish wheel to internal share
+
+# Lightweight release pipeline: build the LayerForge wheel and drop it on the
+# internal network share colleagues install from. There is deliberately no
+# installer matrix, no code-signing step, and no constructor config here —
+# we distribute as a napari plugin on top of napari's own official, signed
+# installer (see docs/install.md).
+on:
+  release:
+    types: [published]
+
+jobs:
+  build-and-publish:
+    # Requires a self-hosted runner that already has the internal network
+    # share mounted (e.g. `\\share\layerforge` on Windows, or an SMB/NFS
+    # mount point on Linux/macOS) — GitHub-hosted runners cannot reach an
+    # internal-only share.
+    runs-on: [self-hosted, internal]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Build wheel
+        run: |
+          pip install build
+          python -m build --wheel
+
+      - name: Copy wheel to the internal network share
+        shell: bash
+        env:
+          # Repository/organization variable (Settings > Secrets and
+          # variables > Actions > Variables) pointing at the mounted share,
+          # e.g. "/mnt/layerforge-share" or "//share/layerforge".
+          LAYERFORGE_SHARE_PATH: ${{ vars.LAYERFORGE_SHARE_PATH }}
+        run: |
+          if [ -z "$LAYERFORGE_SHARE_PATH" ]; then
+            echo "::error::Set the LAYERFORGE_SHARE_PATH repository/organization variable to the mounted internal share path before running this workflow."
+            exit 1
+          fi
+          cp dist/*.whl "$LAYERFORGE_SHARE_PATH/"
+
+      - name: Upload wheel as a workflow artifact (audit trail / fallback)
+        uses: actions/upload-artifact@v4
+        with:
+          name: layerforge-wheel-${{ github.ref_name }}
+          path: dist/*.whl

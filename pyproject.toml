@@ -9,15 +9,22 @@ description = "Interactive semantic annotation of SpatialData images using napar
 readme = "README.md"
 license = { text = "MIT" }
 requires-python = ">=3.9"
+classifiers = [
+    "Framework :: napari",
+]
 dependencies = [
     "spatialdata>=0.7.2",
+    "spatialdata-io>=0.6.0",
     "napari>=0.6.0",
     "napari-spatialdata>=0.7.0",
+    "npe2>=0.7.0",
+    "magicgui>=0.8.0",
     "numpy>=1.24",
     "geopandas>=0.14",
     "shapely>=2.0",
     "scikit-image>=0.21",
     "rasterio>=1.3",
+    "tifffile>=2023.7.10",
     "dask>=2024.1",
     "dask-image>=2024.5",
     "anndata>=0.10",
@@ -29,11 +36,15 @@ dependencies = [
     "qtpy>=2.4",
 ]
 
+[project.entry-points."napari.manifest"]
+LayerForge = "LayerForge:napari.yaml"
+
 [project.optional-dependencies]
 dev = [
     "pytest>=8.0",
     "pytest-cov>=5.0",
     "build>=1.0",
+    "npe2>=0.7.0",
 ]
 
 [tool.setuptools.dynamic]
@@ -43,7 +54,7 @@ version = { attr = "LayerForge._version.__version__" }
 where = ["src"]
 
 [tool.setuptools.package-data]
-LayerForge = ["py.typed", "data/*.npy"]
+LayerForge = ["py.typed", "data/*.npy", "napari.yaml"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
