@@ -28,12 +28,21 @@ You only do this once per computer.
    Applications folder. You should see an empty viewer window. Close it
    for now.
 
-### 1.2 Install the LayerForge plugin
+### 1.2 Get the LayerForge wheel file
 
-Ask your team for the location of the LayerForge wheel file on the
-internal network share if you don't already know it (it will look like
-`layerforge-<version>-py3-none-any.whl`, e.g.
-`\\share\layerforge\layerforge-0.4.0-py3-none-any.whl`).
+You need a `layerforge-<version>-py3-none-any.whl` file. Get it one of
+two ways:
+
+- **From GitHub (works for everyone with repo access)**: go to
+  [github.com/mjbcowan/LayerForge/releases](https://github.com/mjbcowan/LayerForge/releases),
+  open the latest release, and download the `.whl` file listed under
+  **Assets**. You'll need to be signed in to GitHub with access to the
+  repo — ask your team if the page 404s for you.
+- **From the internal network share (if your team uses one)**: ask your
+  team for the path, e.g.
+  `\\share\layerforge\layerforge-0.4.0-py3-none-any.whl`.
+
+### 1.3 Install the LayerForge plugin
 
 1. Open napari.
 2. From the menu bar, choose **Plugins → Install/Uninstall Plugins…**
@@ -56,7 +65,7 @@ internal network share if you don't already know it (it will look like
 > — it may be set to "conda" instead of "pip". Switch it to "pip" and
 > try again.
 
-> You only need to repeat Part 1.2 when your team publishes a new
+> You only need to repeat Parts 1.2–1.3 when your team publishes a new
 > LayerForge version — napari's plugin manager will show you when an
 > update is available.
 
@@ -193,7 +202,7 @@ by leaving them in the shared project folder) once you're done.
 
 | Problem | What to do |
 |---|---|
-| Plugin doesn't appear under **Plugins → LayerForge** | Re-do Part 1.2 and restart napari. |
+| Plugin doesn't appear under **Plugins → LayerForge** | Re-do Parts 1.2–1.3 and restart napari. |
 | Red "open an image first" banner | Open your image (Part 2) before clicking **Launch annotation session**. |
 | Red banner about the output path | Make sure the filename ends in `.tif`, `.tiff`, or `.npy`. |
 | Image doesn't open at all | Check the file type is `.tif`/`.tiff`/`.png`/`.jpg`/`.jpeg`. |

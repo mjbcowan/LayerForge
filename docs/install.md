@@ -15,16 +15,35 @@ https://github.com/napari/napari/releases
 We do not build or sign our own installer — LayerForge rides on top of
 napari's existing, already-signed distribution.
 
-## 2. Install the LayerForge plugin (one-time, per machine)
+## 2. Get the LayerForge wheel
 
-The LayerForge wheel is published to the internal network share on every
-release (see `.github/workflows/publish-wheel.yml`), e.g.
-`\\share\layerforge\layerforge-0.4.0-py3-none-any.whl`.
+**Where to get it (pick whichever your team has set up):**
+
+- **GitHub Releases (always available, no extra setup)** — every published
+  release attaches a `layerforge-<version>-py3-none-any.whl` file directly
+  to it: https://github.com/mjbcowan/LayerForge/releases — click the
+  latest release, then download the `.whl` from its **Assets**. This repo
+  is private, so you'll need GitHub access to the repo (the same access
+  you'd use to browse the code) — ask your team to add you if you can't
+  see it.
+- **Internal network share (if your team has wired this up)** — some teams
+  additionally mirror the wheel to a network share on release (see
+  `.github/workflows/publish-wheel.yml`, `publish-to-internal-share` job),
+  e.g. `\\share\layerforge\layerforge-0.4.0-py3-none-any.whl`. This is
+  opt-in infrastructure (a self-hosted CI runner + a configured share
+  path) — ask your team whether it's set up before assuming a wheel is
+  there.
+
+## 3. Install the LayerForge plugin (one-time, per machine)
+
+Once you have the `.whl` file (downloaded from GitHub, or from the share):
 
 **Option A — napari's built-in Plugin Manager (recommended for most users)**
 
-`Plugins > Install/Uninstall Plugins... > Install by dropping file` and
-point it at the wheel on the share. No terminal required.
+`Plugins > Install/Uninstall Plugins...`, then drag the `.whl` file onto
+the dialog (or paste its path into the text box at the bottom) and click
+**Install**. No terminal required — see `docs/annotation_protocol.md` for
+a fully click-by-click walkthrough.
 
 **Option B — one-line command**
 
@@ -32,7 +51,7 @@ Run this once, using the Python bundled *inside* the napari installation
 (not your system Python):
 
 ```
-<path-to-napari-bundle>\python.exe -m pip install --upgrade \\share\layerforge\layerforge-0.4.0-py3-none-any.whl
+<path-to-napari-bundle>\python.exe -m pip install --upgrade <path-to-downloaded-wheel>\layerforge-0.4.0-py3-none-any.whl
 ```
 
 Convenience wrapper scripts are provided so nobody has to remember the
@@ -42,7 +61,7 @@ bundle's python path by hand:
 - macOS/Linux: `scripts/install-layerforge.sh`
 
 ```powershell
-.\scripts\install-layerforge.ps1 -NapariPythonPath "$env:LOCALAPPDATA\napari\python.exe" -WheelPath "\\share\layerforge\layerforge-0.4.0-py3-none-any.whl"
+.\scripts\install-layerforge.ps1 -NapariPythonPath "$env:LOCALAPPDATA\napari\python.exe" -WheelPath "<path-to-downloaded-wheel>\layerforge-0.4.0-py3-none-any.whl"
 ```
 
 ## 3. Using it
