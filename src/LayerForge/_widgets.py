@@ -8,25 +8,30 @@ QMainWindow/QWizard, and reports errors via napari's built-in
 
 Public API
 ----------
-AnnotationWidget      – dock widget: define classes, pick a mode, launch a session.
-make_annotation_widget – npe2 widget-contribution factory (injects the current Viewer).
+AnnotationWidget – dock widget: define classes, pick a mode, launch a session.
+    Registered directly (not via a factory function) as the npe2 widget
+    contribution's ``python_name`` — napari's dock-widget injection only
+    recognises a ``viewer: napari.viewer.Viewer`` parameter on a widget
+    *class*'s ``__init__``, not on an arbitrary factory function.
 """
 
 from __future__ import annotations
 
 from pathlib import Path
-from typing import TYPE_CHECKING
 
+# Imported eagerly (not just under TYPE_CHECKING): napari's widget-injection
+# machinery resolves each parameter's type annotation at runtime (via
+# typing.get_type_hints) to decide whether to hand the current Viewer to a
+# widget factory, so `napari.viewer.Viewer` must be a real, resolvable name
+# in this module's namespace, not merely a string forward-reference.
+import napari
 from magicgui.widgets import ComboBox, Container, FileEdit, Label, LineEdit, PushButton, SpinBox
 
 from LayerForge._version import __version__
 from LayerForge.annotate_sdata import run_annotation_session
 
-if TYPE_CHECKING:
-    import napari
 
-
-def _sdata_from_viewer(viewer: "napari.viewer.Viewer"):
+def _sdata_from_viewer(viewer: napari.viewer.Viewer):
     """
     Recover the ``(sdata, image_key)`` pair attached to a viewer's layers.
 
@@ -66,7 +71,7 @@ class AnnotationWidget(Container):
     opened via napari's native ``File > Open`` / drag-and-drop.
     """
 
-    def __init__(self, viewer: "napari.viewer.Viewer") -> None:
+    def __init__(self, viewer: napari.viewer.Viewer) -> None:
         self._viewer = viewer
 
         self._about = Label(value=f"LayerForge v{__version__}")
@@ -139,8 +144,3 @@ class AnnotationWidget(Container):
             )
         except Exception as exc:  # surfaced to the user, never raised into napari's event loop
             show_error(f"LayerForge: annotation session failed — {exc}")
-
-
-def make_annotation_widget(viewer: "napari.viewer.Viewer") -> AnnotationWidget:
-    """npe2 widget-contribution factory — napari injects the current Viewer."""
-    return AnnotationWidget(viewer)

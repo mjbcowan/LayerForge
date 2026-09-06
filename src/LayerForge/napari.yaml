@@ -7,7 +7,7 @@ contributions:
       python_name: LayerForge._reader:napari_get_reader
     - id: LayerForge.make_annotation_widget
       title: LayerForge annotation panel
-      python_name: LayerForge._widgets:make_annotation_widget
+      python_name: LayerForge._widgets:AnnotationWidget
 
   readers:
     - command: LayerForge.get_reader

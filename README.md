@@ -7,7 +7,9 @@ LayerForge is also a **napari plugin**: it registers an `npe2` reader for
 `.tif`/`.tiff`/`.png`/`.jpg`/`.jpeg` (so `File > Open` / drag-and-drop just
 works) and a "LayerForge annotation panel" dock widget for defining classes,
 picking labels/shapes mode, and launching a session — see `docs/install.md`
-for how colleagues install it into the official napari desktop app.
+for how colleagues install it into the official napari desktop app, and
+`docs/annotation_protocol.md` for a no-coding-required, step-by-step guide
+to installing napari + the plugin and running an annotation session.
 
 ## Installation
 

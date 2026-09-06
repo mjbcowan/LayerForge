@@ -8,6 +8,7 @@ import pytest
 import spatialdata
 from spatialdata.models import Image2DModel
 
+from LayerForge._version import __version__
 from LayerForge._widgets import AnnotationWidget, _sdata_from_viewer
 
 
@@ -39,6 +40,25 @@ def test_sdata_from_viewer_recovers_metadata(headless_viewer, demo_sdata):
     sdata, image_key = _sdata_from_viewer(headless_viewer)
     assert sdata is demo_sdata
     assert image_key == "image"
+
+
+def test_annotation_widget_is_instantiated_by_napari_dock_widget_injection(headless_viewer):
+    """
+    Regression test: napari's dock-widget injection only recognises a
+    `viewer: napari.viewer.Viewer` annotation on a widget *class*'s
+    `__init__` (matched as an exact string/type, see
+    napari._qt.qt_main_window._instantiate_dock_widget). A quoted forward
+    reference under `from __future__ import annotations` silently becomes
+    the literal string '"napari.viewer.Viewer"' instead, which breaks this
+    without raising an import-time error — so this must be exercised via
+    napari's own widget-injection entry point, not by constructing
+    AnnotationWidget directly.
+    """
+    _dock_widget, widget = headless_viewer.window.add_plugin_dock_widget(
+        "LayerForge", "LayerForge annotation panel"
+    )
+    assert isinstance(widget, AnnotationWidget)
+    assert widget._about.value == f"LayerForge v{__version__}"
 
 
 def test_annotation_widget_default_class_row(headless_viewer):
