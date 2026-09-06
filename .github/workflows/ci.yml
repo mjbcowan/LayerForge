@@ -11,7 +11,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.10", "3.11"]
+        # spatialdata>=0.7.2 (see pyproject.toml) itself requires Python
+        # >=3.11 on PyPI, hence the floor here matching requires-python.
+        python-version: ["3.11", "3.12"]
     env:
       # napari.Viewer(show=False) still builds a real Qt application; the
       # offscreen platform plugin lets PyQt5 do that without a display.
@@ -23,6 +25,13 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
+
+      # QT_QPA_PLATFORM=offscreen alone gets a Qt app running headless, but
+      # adding an Image layer still creates a real vispy/OpenGL canvas
+      # (napari._vispy.layers.image queries GL_EXTENSIONS), which needs an
+      # actual GL library present — GitHub's runners don't ship one by
+      # default.
+      - uses: pyvista/setup-headless-display-action@v5
 
       - name: Install LayerForge (editable, with dev + test extras)
         run: pip install -e ".[dev]"
