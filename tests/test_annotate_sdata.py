@@ -13,6 +13,7 @@ from LayerForge.annotate_sdata import (
     labels_layer_to_sdata,
     rasterize_shapes_to_labels,
     labels_to_shapes,
+    _flush_flattened_mask,
 )
 
 
@@ -101,3 +102,29 @@ def test_labels_to_shapes_roundtrip(demo_sdata):
     assert "vectorized_shapes" in demo_sdata.shapes
     gdf = demo_sdata.shapes["vectorized_shapes"]
     assert set(gdf["class_id"].unique()) == {1, 2}
+
+
+@pytest.mark.parametrize("suffix", [".tif", ".tiff", ".npy"])
+def test_flush_flattened_mask_writes_mask_and_zarr(demo_sdata, tmp_path, suffix):
+    mask = np.zeros((64, 64), dtype=np.int32)
+    mask[:32, :] = 1
+    output_path = tmp_path / f"mask{suffix}"
+
+    _flush_flattened_mask(mask, demo_sdata, output_path)
+
+    assert output_path.exists()
+    if suffix == ".npy":
+        roundtripped = np.load(output_path)
+    else:
+        import tifffile
+        roundtripped = tifffile.imread(output_path)
+    np.testing.assert_array_equal(roundtripped, mask)
+
+    zarr_path = output_path.with_suffix(".zarr")
+    assert zarr_path.exists()
+
+
+def test_flush_flattened_mask_rejects_unsupported_suffix(demo_sdata, tmp_path):
+    mask = np.zeros((8, 8), dtype=np.int32)
+    with pytest.raises(ValueError, match="output_path must end in"):
+        _flush_flattened_mask(mask, demo_sdata, tmp_path / "mask.bmp")

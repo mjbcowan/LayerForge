@@ -3,10 +3,20 @@ A helper package to annotate semantic masks using Napari for image elements of s
 
 > _This package is a work in progress_
 
+LayerForge is also a **napari plugin**: it registers an `npe2` reader for
+`.tif`/`.tiff`/`.png`/`.jpg`/`.jpeg` (so `File > Open` / drag-and-drop just
+works) and a "LayerForge annotation panel" dock widget for defining classes,
+picking labels/shapes mode, and launching a session — see `docs/install.md`
+for how colleagues install it into the official napari desktop app.
+
 ## Installation
+
+For developers of this package:
 ```python
 pip install git+https://<PAT>@github.com/mjbcowan/LayerForge@main
 ```
+
+For colleagues using the desktop napari app, see `docs/install.md`.
 
 ## References and Acknowledgements
 > **This _package_ is not officially affiliated with SpatialData, nor Napari**

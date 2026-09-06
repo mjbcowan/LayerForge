@@ -8,6 +8,7 @@ get_scale0_xarray         – Return the scale0 DataArray of a SpatialData image
 get_channel_names         – Extract channel names from a SpatialData image element.
 copy_transform            – Copy the coordinate transform from one element to another.
 wrap_to_multiscale_labels – Wrap a single numpy mask into a multiscale Labels element.
+sdata_image_to_layer_data – Convert a SpatialData image element into napari LayerDataTuples.
 class_id_colormap         – Build a napari colormap dict for N semantic classes.
 print_sdata_summary       – Pretty-print a SpatialData object's element inventory.
 """
@@ -98,6 +99,95 @@ def copy_transform(
     """
     transform = get_transformation(source_element, to_coordinate_system=coordinate_system)
     set_transformation(target_element, transform, to_coordinate_system=coordinate_system)
+
+
+# ---------------------------------------------------------------------------
+# napari layer conversion
+# ---------------------------------------------------------------------------
+
+# Colormaps to cycle through for each channel when adding an image to napari.
+_CHANNEL_COLORMAPS = [
+    "blue", "green", "red", "cyan", "magenta", "yellow",
+    "gray", "bop orange", "bop purple", "bop blue",
+]
+
+
+def sdata_image_to_layer_data(
+    sdata: spatialdata.SpatialData,
+    image_key: str = "image",
+) -> list[tuple]:
+    """
+    Convert a SpatialData image element into napari ``LayerDataTuple``s.
+
+    Each channel becomes its own ``"image"`` layer tuple ``(data, kwargs,
+    "image")`` so channels can be toggled, coloured, and contrast-adjusted
+    independently — the shared logic behind both
+    :func:`LayerForge.annotate_sdata.open_in_napari` and the npe2 reader
+    contribution, so channel handling lives in exactly one place. Pyramid
+    levels are kept as dask arrays (lazy) so large images are not eagerly
+    loaded into RAM.
+
+    Every returned layer's ``metadata`` carries ``"sdata"`` and
+    ``"image_key"`` — the same convention napari-spatialdata uses to attach
+    a SpatialData object to a layer — so viewer widgets can recover *sdata*
+    without a bespoke file dialog.
+
+    Parameters
+    ----------
+    sdata:
+        A loaded SpatialData object.
+    image_key:
+        Key of the image element inside ``sdata.images``.
+
+    Returns
+    -------
+    list[tuple]
+        A list of ``(data, add_kwargs, "image")`` tuples, one per channel.
+    """
+    import dask.array as da
+
+    element = sdata.images[image_key]
+
+    try:
+        # MultiscaleSpatialImage → collect pyramid levels in order, keeping
+        # data as dask arrays (no .values call) to avoid eager loading.
+        scale_keys = sorted(element.keys())  # "scale0", "scale1", …
+        pyramid = []
+        for sk in scale_keys:
+            ds = element[sk].ds
+            arr = next(iter(ds.data_vars.values()))
+            pyramid.append(da.from_array(arr) if not hasattr(arr.data, "dask") else arr.data)
+        n_channels = pyramid[0].shape[0]
+        data_is_multiscale = True
+    except (TypeError, AttributeError):
+        # Plain DataArray — wrap in a single-element list so the loop below
+        # works uniformly.
+        arr = element
+        dask_arr = da.from_array(arr) if not hasattr(arr.data, "dask") else arr.data
+        pyramid = [dask_arr]
+        n_channels = pyramid[0].shape[0]
+        data_is_multiscale = False
+
+    channel_names = get_channel_names(sdata, image_key) or None
+
+    layer_data: list[tuple] = []
+    for ch_idx in range(n_channels):
+        ch_pyramid = [level[ch_idx] for level in pyramid]
+        ch_data = ch_pyramid if data_is_multiscale else ch_pyramid[0]
+
+        ch_name = channel_names[ch_idx] if channel_names and ch_idx < len(channel_names) else f"ch-{ch_idx}"
+        colormap = _CHANNEL_COLORMAPS[ch_idx % len(_CHANNEL_COLORMAPS)]
+
+        kwargs = dict(
+            name=ch_name,
+            colormap=colormap,
+            blending="additive",
+            visible=True,
+            metadata={"sdata": sdata, "image_key": image_key, "channel_index": ch_idx},
+        )
+        layer_data.append((ch_data, kwargs, "image"))
+
+    return layer_data
 
 
 # ---------------------------------------------------------------------------
