@@ -8,6 +8,16 @@ name: Publish wheel
 on:
   release:
     types: [published]
+  # Lets a maintainer re-run this against an *existing* release (e.g. one
+  # that was published before this workflow could actually build/attach a
+  # wheel) without deleting and recreating it. Run from the Actions tab:
+  # "Publish wheel" > "Run workflow", filling in the tag.
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Existing release tag to attach the wheel to, e.g. v0.4.0"
+        required: true
+        type: string
 
 jobs:
   # Primary distribution point: attach the wheel to the GitHub Release
@@ -20,6 +30,8 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.tag || github.ref }}
 
       - uses: actions/setup-python@v5
         with:
@@ -33,6 +45,7 @@ jobs:
       - name: Attach wheel to the GitHub Release
         uses: softprops/action-gh-release@v3
         with:
+          tag_name: ${{ github.event.inputs.tag || github.event.release.tag_name }}
           files: dist/*.whl
 
   # Secondary, optional distribution point: also drop the wheel on the
