@@ -15,8 +15,13 @@ jobs:
         # >=3.11 on PyPI, hence the floor here matching requires-python.
         python-version: ["3.11", "3.12"]
     env:
-      # napari.Viewer(show=False) still builds a real Qt application; the
+      # napari's make_napari_viewer fixture builds a real Qt application; the
       # offscreen platform plugin lets PyQt5 do that without a display.
+      #
+      # Linux only. Do NOT set this when running the suite locally on macOS:
+      # the offscreen platform provides no OpenGL context, so napari's canvas
+      # setup (napari._vispy.utils.gl.get_max_texture_sizes) segfaults. On
+      # macOS just run `pytest` with no QT_QPA_PLATFORM set.
       QT_QPA_PLATFORM: offscreen
 
     steps:
@@ -39,5 +44,35 @@ jobs:
       - name: Validate the npe2 plugin manifest
         run: python -m npe2 validate src/LayerForge/napari.yaml
 
+      # Coverage is measured here but NOT gated here: --cov-fail-under=0
+      # overrides the fail_under in pyproject.toml so that a coverage
+      # shortfall cannot be mistaken for a test failure. The gate is the
+      # separate step below.
       - name: Run tests
-        run: pytest
+        run: pytest --cov=LayerForge --cov-report=term-missing --cov-report=xml --cov-fail-under=0
+
+      # Publishing happens BEFORE the gate on purpose: anything after a failed
+      # step is skipped, so uploading first means a build that trips the
+      # coverage floor still updates the README badge and leaves behind the
+      # report you need to see which lines regressed.
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          files: ./coverage.xml
+          flags: py${{ matrix.python-version }}
+          # Codecov drives the README badge only. The gate that can fail this
+          # build is the step below, so a Codecov outage must not turn CI red.
+          fail_ci_if_error: false
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+
+      - name: Upload coverage artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-py${{ matrix.python-version }}
+          path: coverage.xml
+          if-no-files-found: ignore
+
+      - name: Enforce coverage floor
+        run: coverage report --fail-under=80

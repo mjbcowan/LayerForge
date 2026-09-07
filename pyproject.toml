@@ -43,6 +43,10 @@ LayerForge = "LayerForge:napari.yaml"
 dev = [
     "pytest>=8.0",
     "pytest-cov>=5.0",
+    # qtbot, required by napari's make_napari_viewer fixture
+    "pytest-qt>=4.4",
+    # property-based tests for the SpatialData element-name sanitizer
+    "hypothesis>=6.100",
     "build>=1.0",
     "npe2>=0.7.0",
 ]
@@ -59,6 +63,35 @@ LayerForge = ["py.typed", "data/*.npy", "napari.yaml"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-v --tb=short"
+# Fail on LayerForge's own element-name warning unless a test opts in with
+# pytest.warns, so an accidental rename shows up as a failure rather than
+# console noise. Matched on the message rather than the module, because
+# warnings.warn(stacklevel=2) attributes the warning to the *caller's*
+# module, which makes a ":LayerForge._reader" module filter never fire.
+# Third-party deprecation chatter is left alone.
+filterwarnings = [
+    "default",
+    "error:Image key:UserWarning",
+]
 
 [tool.coverage.run]
 source = ["LayerForge"]
+
+[tool.coverage.report]
+# Descriptive, with headroom. The suite sits at 94%; the floor is set a few
+# points below so that unrelated churn (a new defensive branch, a dependency
+# shifting which lines are reachable) does not turn CI red on its own, while a
+# genuine regression still does.
+#
+# The old 80% was aspirational, set while annotate_sdata.py sat at 29% and the
+# gate failed every build on purpose. That module is now at 99%.
+#
+# Ratchet policy: this number only ever goes up. See CONTRIBUTING.md.
+fail_under = 90
+show_missing = true
+exclude_lines = [
+    "pragma: no cover",
+    "if TYPE_CHECKING:",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+]

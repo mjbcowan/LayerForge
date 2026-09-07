@@ -105,18 +105,9 @@ def add_labels_layer(
     -------
     napari.layers.Labels
     """
-    element = sdata.images[image_key]
+    from LayerForge.sdata_utils import get_scale0_shape
 
-    # Get the (y, x) shape from scale0
-    try:
-        scale0 = element["scale0"].ds
-        xarr = next(iter(scale0.data_vars.values()))
-        h = xarr.sizes["y"]
-        w = xarr.sizes["x"]
-    except (TypeError, AttributeError):
-        # Plain DataArray
-        h = element.sizes["y"]
-        w = element.sizes["x"]
+    h, w = get_scale0_shape(sdata, image_key)
 
     mask = np.zeros((h, w), dtype=np.int32)
     labels_layer = viewer.add_labels(mask, name=layer_name)
@@ -478,27 +469,23 @@ def rasterize_shapes_to_labels(
     from rasterio.features import rasterize as rio_rasterize  # type: ignore
     from affine import Affine  # type: ignore
 
+    from LayerForge.sdata_utils import get_scale0_shape
+
     gdf: gpd.GeoDataFrame = sdata.shapes[shapes_key]
 
     # Determine image size at scale0
-    element = sdata.images[image_key]
-    try:
-        scale0 = element["scale0"].ds
-        xarr = next(iter(scale0.data_vars.values()))
-        h, w = xarr.sizes["y"], xarr.sizes["x"]
-    except (TypeError, AttributeError):
-        h, w = element.sizes["y"], element.sizes["x"]
+    h, w = get_scale0_shape(sdata, image_key)
 
     # Polygon vertices are stored in napari pixel-index space:
     # napari uses (row, col) = (y, x) with origin at top-left and step = 1.
     # shapes_layer_to_sdata swaps napari's (row, col) → shapely (x=col, y=row).
     # rasterio burns shapes using their (x, y) coords against this affine.
     #
-    # Affine.translation(0, 0) * Affine.scale(1, 1) is the identity:
+    # The identity affine is what we want:
     #   col  = x * 1 + 0  → maps shapely x directly to pixel column
     #   row  = y * 1 + 0  → maps shapely y directly to pixel row
     # This keeps y increasing downward (row 0 = top), matching array layout.
-    affine = Affine.translation(0, 0) * Affine.scale(1, 1)
+    affine = Affine.identity()
 
     # Sort largest polygons first so smaller, finer regions are burned last
     # and therefore win when polygons overlap (last-write wins in rasterio).
@@ -554,6 +541,12 @@ def labels_to_shapes(
     semantic ``class_id`` is preserved as a column in the resulting GeoDataFrame.
     Background pixels (value 0) are ignored.
 
+    The GeoDataFrame's *index* is set to the instance ID rather than left as a
+    default ``RangeIndex``.  SpatialData treats a shapes element's index as its
+    instance key, so a table whose ``instance_key`` column holds these same IDs
+    (see :func:`measure_label_morphology`) only joins against this element via
+    ``spatialdata.join_spatialelement_table`` when the two line up.
+
     Parameters
     ----------
     sdata:
@@ -598,7 +591,9 @@ def labels_to_shapes(
             next_id += 1
 
     # --- vectorize with rasterio --------------------------------------------
-    affine = Affine.translation(0, 0) * Affine.scale(1, 1)
+    # Identity: shapely (x, y) maps straight onto (column, row). Mirrors the
+    # affine used when burning shapes in rasterize_shapes_to_labels.
+    affine = Affine.identity()
     records = []
     for geom_dict, value in rio_shapes(instance_mask, mask=(instance_mask > 0), transform=affine):
         iid = int(value)
@@ -609,6 +604,12 @@ def labels_to_shapes(
         })
 
     gdf = gpd.GeoDataFrame(records, crs=None)
+
+    # Index == instance key, per spatialdata's annotation convention. Leaving
+    # the default RangeIndex (0, 1, …) here silently breaks the table join,
+    # because instance IDs start at 1.
+    gdf.index = gdf["instance_id"]
+    gdf.index.name = None
 
     ref_transform = get_transformation(
         sdata.images[image_key], to_coordinate_system="global"
@@ -720,11 +721,13 @@ def measure_label_morphology(
     df["region"] = shapes_key
 
     # --- build AnnData and store as spatialdata Table -----------------------
-    obs = df.set_index("instance_id").copy()
-    obs.index = obs.index.astype(str)
+    # `instance_id` must be a column and NOT also the index's name: spatialdata's
+    # join_spatialelement_table calls obs.reset_index() internally, which raises
+    # "cannot insert instance_id, already exists" when it is both.
+    obs = df.copy()
+    obs.index = df["instance_id"].astype(str)
+    obs.index.name = None
     adata = ad.AnnData(obs=obs)
-    adata.obs["instance_id"] = df["instance_id"].values
-    adata.obs["region"] = shapes_key
 
     table = TableModel.parse(
         adata,
@@ -864,10 +867,17 @@ def run_annotation_session(
     """
     viewer = open_in_napari(sdata, image_key=image_key)
 
+    # Snapshot the image layer *objects* now. The export below runs off the Qt
+    # window's `destroyed` signal, and by the time that fires napari has already
+    # emptied viewer.layers — iterating it there yields nothing, so the captured
+    # limits would always be {}. The layer objects themselves outlive removal
+    # and still carry the contrast_limits the user settled on.
+    image_layers = list(viewer.layers)
+
     def _capture_contrast_limits() -> dict[str, list[float]]:
-        """Read contrast_limits from every Image layer in the viewer."""
+        """Read contrast_limits from every Image layer opened for this session."""
         limits = {}
-        for lyr in viewer.layers:
+        for lyr in image_layers:
             if hasattr(lyr, "contrast_limits"):
                 limits[lyr.name] = list(lyr.contrast_limits)
         return limits
@@ -978,16 +988,9 @@ def load_labels_for_refinement(
     -------
     napari.layers.Labels
     """
-    element = sdata.images[image_key]
+    from LayerForge.sdata_utils import get_scale0_shape
 
-    try:
-        scale0 = element["scale0"].ds
-        xarr = next(iter(scale0.data_vars.values()))
-        h = xarr.sizes["y"]
-        w = xarr.sizes["x"]
-    except (TypeError, AttributeError):
-        h = element.sizes["y"]
-        w = element.sizes["x"]
+    h, w = get_scale0_shape(sdata, image_key)
 
     if mask.shape != (h, w):
         raise ValueError(

@@ -3,6 +3,12 @@
   <img src="docs/assets/layerforge_logo_nbg.png" alt="LayerForge" width="400">
 </p>
 
+<p align="center">
+  <a href="https://github.com/mjbcowan/LayerForge/actions/workflows/ci.yml"><img src="https://github.com/mjbcowan/LayerForge/actions/workflows/ci.yml/badge.svg" alt="CI status"></a>
+  <a href="https://codecov.io/gh/mjbcowan/LayerForge"><img src="https://codecov.io/gh/mjbcowan/LayerForge/branch/main/graph/badge.svg" alt="Coverage"></a>
+  <a href="https://www.python.org/downloads/"><img src="https://img.shields.io/badge/python-3.11%20%7C%203.12-blue.svg" alt="Python 3.11 | 3.12"></a>
+  <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT"></a>
+</p>
 
 A plugin to annotate simple masks of multi-scale biological images, efficiently, and produce a paired mask output.
 

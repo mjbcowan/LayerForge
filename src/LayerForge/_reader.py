@@ -16,6 +16,7 @@ napari_get_reader       – npe2 reader-contribution entry point.
 from __future__ import annotations
 
 import os
+import warnings
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -131,6 +132,32 @@ def _read_image_element(
     )
 
 
+def _sanitize_element_name(name: str, fallback: str = "image") -> str:
+    """
+    Rewrite *name* into a valid SpatialData element name.
+
+    Kept in sync with ``spatialdata._core.validation.check_valid_name``, which
+    every element key must satisfy: non-empty, not ``"."`` or ``".."``, no
+    ``"__"`` prefix, and every character either alphanumeric or one of
+    ``_-.``. Microscope exports routinely contain spaces, parentheses and
+    commas, so a filename stem used verbatim as a key breaks
+    ``SpatialData()`` construction.
+
+    Disallowed characters become ``"_"``. Note the per-character
+    ``str.isalnum()`` test is deliberate rather than an ASCII regex class:
+    ``isalnum()`` is Unicode-aware, so accented and non-Latin stems are
+    already valid and are preserved as-is.
+    """
+    sanitized = "".join(c if (c.isalnum() or c in "_-.") else "_" for c in name)
+    # "__" is reserved, so collapse any leading run of underscores to one.
+    sanitized = "_" + sanitized.lstrip("_") if sanitized.startswith("__") else sanitized
+    # Nothing but separators left (an empty stem, ".", "..", all-whitespace):
+    # there is no name to keep, so use a placeholder.
+    if not any(c.isalnum() for c in sanitized):
+        return fallback
+    return sanitized
+
+
 def load_image_as_sdata(
     path: "str | Path",
     data_axes: "tuple[str, ...] | list[str] | None" = None,
@@ -155,8 +182,10 @@ def load_image_as_sdata(
         Defaults to ``("c", "y", "x")`` for TIFFs and ``("y", "x", "c")``
         for PNG/JPEG.
     image_key:
-        Key under which the image is stored in ``sdata.images``. Defaults
-        to the file stem.
+        Key under which the image is stored in ``sdata.images``. Defaults to
+        the file stem, with any character SpatialData disallows in an element
+        name (anything other than alphanumerics, ``_``, ``-`` and ``.``)
+        replaced by ``_``. An explicitly passed key is used verbatim.
     scale_factors:
         ``"auto"`` (default) picks halving factors from image size via
         :func:`default_scale_factors`; pass an explicit list (e.g.
@@ -177,7 +206,15 @@ def load_image_as_sdata(
             f"Unsupported file type {path.suffix!r}; expected one of {SUPPORTED_SUFFIXES}"
         )
 
-    image_key = image_key or path.stem
+    if image_key is None:
+        image_key = _sanitize_element_name(path.stem)
+        if image_key != path.stem:
+            warnings.warn(
+                f"Image key {path.stem!r} contains characters SpatialData does not "
+                f"allow in element names; using {image_key!r} instead.",
+                UserWarning,
+                stacklevel=2,
+            )
     if data_axes is None:
         data_axes = _DEFAULT_DATA_AXES[suffix]
 

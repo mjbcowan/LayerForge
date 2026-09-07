@@ -1,9 +1,13 @@
 """
-Tests for the LayerForge napari plugin widgets (_widgets.py) — headless,
-using napari.Viewer(show=False) like the rest of the suite.
+Tests for the LayerForge napari plugin widgets (_widgets.py).
+
+Viewers come from napari's own ``make_napari_viewer`` fixture, which napari
+ships as a pytest plugin (the ``pytest11`` entry point on
+``napari.utils._testsupport``, so no conftest wiring is needed). It handles
+Qt app setup and teardown and fails tests that leak viewers or widgets —
+which a hand-rolled ``napari.Viewer(show=False)`` fixture does not.
 """
 import numpy as np
-import napari
 import pytest
 import spatialdata
 from spatialdata.models import Image2DModel
@@ -21,28 +25,27 @@ def demo_sdata():
 
 
 @pytest.fixture
-def headless_viewer():
-    viewer = napari.Viewer(show=False)
-    yield viewer
-    viewer.close()
+def viewer(make_napari_viewer):
+    """A napari viewer with cleanup handled by napari's own test support."""
+    return make_napari_viewer()
 
 
-def test_sdata_from_viewer_returns_none_when_no_layers(headless_viewer):
-    sdata, image_key = _sdata_from_viewer(headless_viewer)
+def test_sdata_from_viewer_returns_none_when_no_layers(viewer):
+    sdata, image_key = _sdata_from_viewer(viewer)
     assert sdata is None
     assert image_key is None
 
 
-def test_sdata_from_viewer_recovers_metadata(headless_viewer, demo_sdata):
-    headless_viewer.add_image(
+def test_sdata_from_viewer_recovers_metadata(viewer, demo_sdata):
+    viewer.add_image(
         np.zeros((32, 32)), name="ch-0", metadata={"sdata": demo_sdata, "image_key": "image"}
     )
-    sdata, image_key = _sdata_from_viewer(headless_viewer)
+    sdata, image_key = _sdata_from_viewer(viewer)
     assert sdata is demo_sdata
     assert image_key == "image"
 
 
-def test_annotation_widget_is_instantiated_by_napari_dock_widget_injection(headless_viewer):
+def test_annotation_widget_is_instantiated_by_napari_dock_widget_injection(viewer):
     """
     Regression test: napari's dock-widget injection only recognises a
     `viewer: napari.viewer.Viewer` annotation on a widget *class*'s
@@ -54,20 +57,20 @@ def test_annotation_widget_is_instantiated_by_napari_dock_widget_injection(headl
     napari's own widget-injection entry point, not by constructing
     AnnotationWidget directly.
     """
-    _dock_widget, widget = headless_viewer.window.add_plugin_dock_widget(
+    _dock_widget, widget = viewer.window.add_plugin_dock_widget(
         "LayerForge", "LayerForge annotation panel"
     )
     assert isinstance(widget, AnnotationWidget)
     assert widget._about.value == f"LayerForge v{__version__}"
 
 
-def test_annotation_widget_default_class_row(headless_viewer):
-    widget = AnnotationWidget(headless_viewer)
+def test_annotation_widget_default_class_row(viewer):
+    widget = AnnotationWidget(viewer)
     assert widget._class_labels() == {1: "class-1"}
 
 
-def test_annotation_widget_add_and_remove_class_row(headless_viewer):
-    widget = AnnotationWidget(headless_viewer)
+def test_annotation_widget_add_and_remove_class_row(viewer):
+    widget = AnnotationWidget(viewer)
     widget._add_class_row()
     assert widget._class_labels() == {1: "class-1", 2: "class-2"}
 
@@ -79,8 +82,8 @@ def test_annotation_widget_add_and_remove_class_row(headless_viewer):
     assert len(widget._class_labels()) == 1
 
 
-def test_annotation_widget_launch_without_image_shows_error(headless_viewer, monkeypatch):
-    widget = AnnotationWidget(headless_viewer)
+def test_annotation_widget_launch_without_image_shows_error(viewer, monkeypatch):
+    widget = AnnotationWidget(viewer)
 
     errors = []
     monkeypatch.setattr(
@@ -94,12 +97,12 @@ def test_annotation_widget_launch_without_image_shows_error(headless_viewer, mon
 
 
 def test_annotation_widget_launch_wires_up_run_annotation_session(
-    headless_viewer, demo_sdata, monkeypatch
+    viewer, demo_sdata, monkeypatch
 ):
-    headless_viewer.add_image(
+    viewer.add_image(
         np.zeros((32, 32)), name="ch-0", metadata={"sdata": demo_sdata, "image_key": "image"}
     )
-    widget = AnnotationWidget(headless_viewer)
+    widget = AnnotationWidget(viewer)
 
     calls = {}
 
