@@ -56,6 +56,12 @@ Once you have the `.whl` file (downloaded from GitHub, or from the share):
 4. Click **Install** (or press Enter). A progress indicator appears
    while it installs.
 5. When it finishes, **restart napari** if prompted.
+6. The plug in will need some helpers. In the python terminal of Napari (see the gif below for python install) run the following command:
+
+```bash
+pip install "spatialdata>=0.7.2" "spatialdata-io>=0.6.0" shapely rasterio scikit-image tifffile dask "dask-image>=2024.5" xarray affine pandas zarr qtpy magicgui npe2
+```
+
 6. Confirm it worked: in the menu bar, check **Plugins → LayerForge**.
    You should see **LayerForge annotation panel** listed.
 
