@@ -1,4 +1,4 @@
-# Annotating RGB images
+# Annotating RGB images in the Jupyter notebook
 Annotating RGB images (virtual H&E, H&E, etc) is a core capability of this method. Once installed, import the relevant modules:
 ```python
 from __future__ import annotations

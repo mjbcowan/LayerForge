@@ -1,77 +1,6 @@
-# Annotation protocol (no coding required)
+# Annotating images in the Napari App
 
-This page is for colleagues who need to **open an image, annotate it, and
-save the result** using napari + LayerForge — no Python, no terminal
-commands beyond the one-time setup in Part 1.
-
-If you've already installed napari and LayerForge, skip to
-[Part 2: Open your image](#part-2-open-your-image).
-
----
-
-## Part 1 — One-time setup
-
-You only do this once per computer.
-
-### 1.1 Install napari
-
-1. Go to napari's official releases page:
-   [github.com/napari/napari/releases](https://github.com/napari/napari/releases)
-2. Under the latest release, download the installer for your operating
-   system:
-      - **Windows** → the `.exe` installer
-      - **macOS** → the `.pkg` installer
-3. Run the installer and accept the defaults. This is the same
-   official, digitally-signed napari app used across the team — nothing
-   custom.
-4. Confirm it worked: open the **napari** app from your Start Menu /
-   Applications folder. You should see an empty viewer window. Close it
-   for now.
-
-### 1.2 Get the LayerForge wheel file
-
-You need a `layerforge-<version>-py3-none-any.whl` file. Get it one of
-two ways:
-
-- **From GitHub (works for everyone with repo access)**: go to
-  [github.com/mjbcowan/LayerForge/releases](https://github.com/mjbcowan/LayerForge/releases),
-  open the latest release, and download the `.whl` file listed under
-  **Assets**. You'll need to be signed in to GitHub with access to the
-  repo — ask your team if the page 404s for you.
-- **From the internal network share (if your team uses one)**: ask your
-  team for the path, e.g.
-  `\\share\layerforge\layerforge-0.4.0-py3-none-any.whl`.
-
-### 1.3 Install the LayerForge plugin
-
-1. Open napari.
-2. From the menu bar, choose **Plugins → Install/Uninstall Plugins…**
-3. Near the bottom of the window there's a text box with faint grey
-   placeholder text (something like *"install from 'pip' by name/url,
-   or drop file…"*) and an **Install** button next to it. Fill it in
-   one of two ways:
-      - **Drag and drop**: open your file browser, find the `.whl`
-        file, and drag it straight onto the plugin dialog window — the
-        text box fills in automatically, **or**
-      - **Type it in**: click the text box and paste the full path to
-        the `.whl` file.
-4. Click **Install** (or press Enter). A progress indicator appears
-   while it installs.
-5. When it finishes, **restart napari** if prompted.
-6. Confirm it worked: in the menu bar, check **Plugins → LayerForge**.
-   You should see **LayerForge annotation panel** listed.
-
-> If the install fails, check the small dropdown next to the text box
-> — it may be set to "conda" instead of "pip". Switch it to "pip" and
-> try again.
-
-> You only need to repeat Parts 1.2–1.3 when your team publishes a new
-> LayerForge version — napari's plugin manager will show you when an
-> update is available.
-
----
-
-## Part 2 — Open your image
+## Part 1 — Open your image
 
 1. Open napari.
 2. Open your image one of two ways:
@@ -90,7 +19,7 @@ listed above.
 
 ---
 
-## Part 3 — Set up the annotation panel
+## Part 2 — Set up the annotation panel
 
 1. From the menu bar, choose **Plugins → LayerForge → LayerForge
    annotation panel**. A new panel docks on the right-hand side of the
@@ -130,12 +59,14 @@ listed above.
 5. Click **Launch annotation session**.
 
    If you see a red error banner instead (for example "open an image
-   first"), it means a step above was missed — open an image (Part 2)
+   first"), it means a step above was missed — open an image (Part 1)
    before clicking Launch.
+
+![annotation_1](../assets/tutorials/pt4-1_annotation_session.gif)
 
 ---
 
-## Part 4 — Annotate
+## Part 3 — Annotate
 
 ### If you chose "labels" mode
 
@@ -168,7 +99,7 @@ listed above.
 
 ---
 
-## Part 5 — Save your work
+## Part 4 — Save your work
 
 You don't need to click a separate "Save" button — **just close the
 napari window** (the ✕ in the corner, or your OS's normal window-close
@@ -196,13 +127,15 @@ check with your team; it's expected behaviour, not an error.
 Hand off both the mask file and the `.zarr` folder to your team (e.g.
 by leaving them in the shared project folder) once you're done.
 
+![annotation_2](../assets/tutorials/pt4-2_annotation_session.gif)
+
 ---
 
 ## Troubleshooting
 
 | Problem | What to do |
 |---|---|
-| Plugin doesn't appear under **Plugins → LayerForge** | Re-do Parts 1.2–1.3 and restart napari. |
+| Plugin doesn't appear under **Plugins → LayerForge** | Re-do [installation](../install.md) and restart napari. |
 | Red "open an image first" banner | Open your image (Part 2) before clicking **Launch annotation session**. |
 | Red banner about the output path | Make sure the filename ends in `.tif`, `.tiff`, or `.npy`. |
 | Image doesn't open at all | Check the file type is `.tif`/`.tiff`/`.png`/`.jpg`/`.jpeg`. |

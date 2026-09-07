@@ -1,30 +1,45 @@
 # LayerForge
-A helper package to annotate semantic masks using Napari for image elements of spatialdata objects (with functionalities to save as embedded shapes / label layers, and as shape parquets / .npy files). Useful for labelling, useful for annotating training data for your own models.
+<p align="center">
+  <img src="docs/assets/layerforge_logo_nbg.png" alt="LayerForge" width="400">
+</p>
 
-> _This package is a work in progress_
 
-LayerForge is also a **napari plugin**: it registers an `npe2` reader for
-`.tif`/`.tiff`/`.png`/`.jpg`/`.jpeg` (so `File > Open` / drag-and-drop just
-works) and a "LayerForge annotation panel" dock widget for defining classes,
-picking labels/shapes mode, and launching a session — see `docs/install.md`
-for how colleagues install it into the official napari desktop app, and
-`docs/annotation_protocol.md` for a no-coding-required, step-by-step guide
-to installing napari + the plugin and running an annotation session.
+A plugin to annotate simple masks of multi-scale biological images, efficiently, and produce a paired mask output.
+
+**Documentation: <https://mjbcowan.github.io/LayerForge/>**
+
+LayerForge is  registers an `npe2` reader for `.tif`/`.tiff`/`.png`/`.jpg`/`.jpeg` (so `File > Open` / drag-and-drop just works) and a "LayerForge annotation panel" dock widget for defining classes, picking labels/shapes mode, and launching a session — see the [installation guide](https://mjbcowan.github.io/LayerForge/install/) for how colleagues install it into the official napari desktop app, and the [annotation protocol](https://mjbcowan.github.io/LayerForge/tutorials/annotation_session_napari/) for a no-coding-required, step-by-step guide to installing napari + the plugin and running an annotation session.
 
 ## Installation
 
 For developers of this package:
-```python
-pip install git+https://<PAT>@github.com/mjbcowan/LayerForge@main
+```bash
+pip install git+https://github.com/mjbcowan/LayerForge
 ```
 
-For colleagues using the desktop napari app, see `docs/install.md`.
+For colleagues using the desktop napari app, see the [installation
+guide](https://mjbcowan.github.io/LayerForge/install/) — download the
+`.whl` from the [latest release](https://github.com/mjbcowan/LayerForge/releases)
+and install it through napari's plugin manager.
+
+## Documentation
+
+The docs site is built with [MkDocs](https://www.mkdocs.org/) +
+[Material](https://squidfunk.github.io/mkdocs-material/) and deployed to
+GitHub Pages by `.github/workflows/docs.yml` on every push to `main`.
+To preview it locally:
+
+```bash
+pip install -r docs/requirements.txt
+mkdocs serve   # then open http://127.0.0.1:8000
+```
 
 ## References and Acknowledgements
 > **This _package_ is not officially affiliated with SpatialData, nor Napari**
 
 
 Please cite the following if using this package. Sincere thanks to the developers and maintainers of these packages.
+
 ```bibtex
 @article{marconato2025spatialdata,
   title={SpatialData: an open and universal data framework for spatial omics},

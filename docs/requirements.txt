@@ -1,0 +1,8 @@
+# Dependencies for building the documentation site only. These are
+# deliberately separate from the package's runtime dependencies in
+# pyproject.toml — building the docs must not require napari, Qt or a
+# display, so the docs workflow stays fast and never needs a GL stack.
+#
+#   pip install -r docs/requirements.txt
+#   mkdocs serve
+mkdocs-material>=9.5,<10

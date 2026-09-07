@@ -1,11 +1,79 @@
 site_name: LayerForge
+site_description: Interactive semantic annotation of SpatialData images using napari
+site_url: https://mjbcowan.github.io/LayerForge/
 repo_url: https://github.com/mjbcowan/LayerForge
+repo_name: mjbcowan/LayerForge
+# Puts an "Edit this page" pencil on every page, pointing at the source
+# Markdown on main.
+edit_uri: edit/main/docs/
+copyright: Released under the MIT License
+
 theme:
   name: material
   logo: assets/layerforge_logo_nbg.png # for on website
   favicon: assets/layerforge_logo_nbg.png # in search bar
+  icon:
+    repo: fontawesome/brands/github
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.sections
+    - navigation.top
+    - toc.follow
+    - content.code.copy
+    - content.action.edit
+    - search.suggest
+    - search.highlight
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: teal
+      accent: teal
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: teal
+      accent: teal
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
+
+nav:
+  - Home: index.md
+  - Install: install.md
+  - Tutorials:
+      - Annotating in Napari: tutorials/annotation_session_napari.md
+      - Annotating RGB images in Jupyter: tutorials/annotate_RGB_in_jupyter.md
+
+# docs/ is the source directory for the site, so anything in it would
+# otherwise be copied into the published output verbatim.
+exclude_docs: |
+  requirements.txt
+
+plugins:
+  - search
 
 markdown_extensions:
   - attr_list
   - md_in_html
   - tables
+  - admonition
+  - footnotes
+  - toc:
+      permalink: true
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.tabbed:
+      alternate_style: true
+  # Required for Material's `:material-…:` / `:octicons-…:` icon shortcodes
+  # (used by the card grid on the home page) to render as inline SVG rather
+  # than printing literally.
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg

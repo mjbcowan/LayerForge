@@ -5,11 +5,36 @@
 
 ![Demo](assets/shapes2label_annotation.gif)
 
-> New to LayerForge and just need to annotate an image? See the
-> [annotation protocol](annotation_protocol.md) for a no-coding-required,
-> step-by-step guide (install napari, install the plugin, annotate, save).
-
 *LayerForge annotation workflow: drawing shapes and generating pixel classification masks. Image credit: [skimage.data (skin)](https://scikit-image.org/docs/stable/api/skimage.data.html).*
+
+## Get started
+
+- **Just need to annotate an image?** Follow the
+  [annotation protocol](tutorials/annotation_session_napari.md) — a no-coding-required,
+  step-by-step guide (install napari, install the plugin, annotate, save).
+- **Installing the plugin** — see [Install](install.md); grab the `.whl` from the [latest release](https://github.com/mjbcowan/LayerForge/releases).
+- **Using the Python API** — start with
+  [Annotating RGB images](tutorials/annotate_RGB_in_jupyter.md).
+
+<div class="grid cards" markdown>
+
+-   :material-clock-fast:{ .lg .middle } __Install the plugin__
+
+    ---
+
+    Install [`LayerForge`](install.md) with a [`.whl`](install.md) in Napari for a no code, simple start
+
+    [:octicons-arrow-right-24: Installation](install.md)
+
+-   :fontawesome-brands-markdown:{ .lg .middle } __How to annotate images__
+
+    ---
+
+    Introduction with videos on how to load your image, set up the classes, and save the output
+
+    [:octicons-arrow-right-24: Tutorial](tutorials/annotation_session_napari.md)
+
+</div>
 
 ## Scope and Design Intent
 `LayerForge` has been designed as a lightweight method for:
@@ -19,10 +44,10 @@
 * Generation of semantic pixel classification masks from annotated shapes
 * Refinement of both of the above
 
-Many of [`napari-spatialdata-repo`](https://github.com/scverse/napari-spatialdata)'s are more extensive and cover broader use cases, however, this repo was designed for this sole use case to increase cycle time of mask-inference generation in custom segmentation model training.
+Many of [`napari-spatialdata`](https://github.com/scverse/napari-spatialdata)'s repos are more extensive and cover broader use cases, however, this repo was designed for this sole use case to increase cycle time of mask-inference generation in custom segmentation model training.
 
 ## CREDITS AND REFERENCES
-Developed by MJBC, this is a pre-release work in progress. **_This package is not officially affilitated with SpatialData, nor Napari_**.
+Developed by MJBC, this is a pre-release work in progress. **_This package is not officially affiliated with SpatialData, nor Napari_**.
 
 
 Please cite the following if using this package:
